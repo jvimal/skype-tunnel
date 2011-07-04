@@ -1,0 +1,90 @@
+
+Initial Steps
+~~~~~~~~~~~~~
+
+1. Install Skype4Py
+   easy_install Skype4Py
+
+2. termcolor
+   easy_install termcolor
+
+3. argparse
+   easy_install argparse
+
+4. On a Mac: Run python as 32bit
+   defaults write com.apple.versioner.python Prefer-32-Bit -bool yes
+
+How to use it
+~~~~~~~~~~~~~
+
+Skype tunnel helps bridge connectivity between end points
+C(lient) and S(erver) by leveraging Skype's infrastructure
+(like NAT traversal and super-nodes).
+
+TODO
+~~~~
+
+This is currently tested on a Mac.  On Linux, tunnel.py
+has to be edited so that it uses iptables instead of ipfw.
+
+Roger suggested that we look into CurveCP/uTP which are
+user-space reliable transport implementations (among other
+things).
+
+Assume:
+~~~~~~~
+
+1. C and S both have skype-ids and that C knows S's skype
+   id.  (Elie mentions a way to get around this, but I haven't
+   implemented it yet.)
+
+2. C and S have root access on their machines.
+
+3. S has two instances of the service, one for users who
+   cannot directly connect to it and another for users
+   who can directly connect to it.
+
+To start using this tool:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On server S:
+
+1. S runs skype server, after starting Skype and logging
+   in:
+   
+     $ python skype.py
+
+2. S runs its server that it wants people to access.
+   For demo sake, let's assume it's ssh running on
+   port 2222.
+
+3. S runs tunnel.py to intercept IP packets originating
+   from ssh program and destined to anywhere.  These
+   are packets that should be tunneled through Skype.
+
+     (as root)
+     $ python tunnel.py --src <local_ip>:2222
+
+On client C:
+
+1. C logs into Skype and obtains S's skype-id.
+
+2. C configurs skype client to connect to S's skype user id.
+
+     $ python skype.py -u <S's skype id>
+
+3. C starts the tunnel to intercept all packets destined
+   to S's (public) IP.
+
+     (as root)
+     $ python tunnel.py --dest <S's IP>:2222
+
+4. All applications that talk to <S's IP>:2222 transparently
+   enjoy the benefits of Skype's traversal mechanisms.
+
+I wish I had enough time to automate most of the steps here.
+I would be happy to chat with anyone who wants to.
+
+--
+Vimal
+
